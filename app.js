@@ -433,7 +433,7 @@ function screenDonnees() {
   // panneau de confirmation remplacer / fusionner
   if (S.ui.pendingImport) {
     const apply = async (mode) => {
-      try { const n = await IO.applyImport(S.ui.pendingImport, mode); S.ui.pendingImport = null; await refreshLogged();
+      try { const n = await IO.applyImport(S.ui.pendingImport, mode); S.ui.pendingImport = null; await refreshLogged(); await refreshHist();
         setMsg(`${mode === "replace" ? "Remplacé" : "Fusionné"} : ${n} séances importées.`, "var(--green)"); render();
       } catch (e) { setMsg("Échec de l'import.", "#D9846B"); }
     };
@@ -459,12 +459,12 @@ function screenDays() {
   node.append(el("div", { style: "display:flex;justify-content:space-between;align-items:flex-start" },
     el("div", {}, el("div", { class: "eyebrow" }, WEEK.semaine.titre), el("h1", { class: "title" }, "Mes séances")),
     el("div", { style: "display:flex;gap:8px" },
-      el("button", { class: "iobtn", onclick: () => { S.screen = "progression"; render(); } }, "📈 Progression"),
+      el("button", { class: "iobtn", onclick: () => { S.screen = "progression"; refreshHist().then(render); } }, "📈 Progression"),
       el("button", { class: "iobtn", onclick: () => { S.screen = "donnees"; render(); } }, "⤓ Données"))));
   node.append(el("p", { class: "sub", style: "margin:0 0 16px" }, "Aperçu avant, bilan après — tout reste consultable."));
   days.forEach((d, i) => {
     const logged = S.loggedDates.includes(d.date);
-    const c = el("button", { class: "daycard" + (d.type === "cardio" ? " cardio" : "") + (logged ? " logged" : ""), onclick: () => { if (d.type === "seance") { S.dayIdx = i; S.screen = "apercu"; S.rest = null; loadDay().then(render); } } },
+    const c = el("button", { class: "daycard" + (d.type === "cardio" ? " cardio" : "") + (logged ? " logged" : ""), onclick: () => { if (d.type === "seance") { S.dayIdx = i; S.screen = "apercu"; S.rest = null; loadDay().then(refreshHist).then(render); } } },
       el("div", { style: "display:flex;justify-content:space-between" },
         el("div", { class: "daydate" }, d.date),
         logged ? el("span", { class: "bc", style: "font-size:12px;color:var(--green)" }, "✓ loguée") : null),
